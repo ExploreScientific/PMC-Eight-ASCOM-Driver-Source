@@ -1,0 +1,20 @@
+# Build output
+bin/
+obj/
+dist/
+
+# NuGet packages
+packages/
+
+# User-specific files
+*.user
+*.suo
+*.cache
+
+# VS temp files
+.vs/
+
+# Executables (keep source, not built binaries)
+# Commenting these out since some .exe files are installers that are part of the project
+# *.exe
+# *.dll
