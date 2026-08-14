@@ -157,10 +157,19 @@
 '                          flip pier side for DEC motor calcs in southern hemisphere slews.
 '                          ConformU result: 0 errors, 2 issues (AxisRate overlap only),
 '                          verified both hemispheres.
-'  09-MAY-2026  GRH/WEM    Resolved RampOnlyOffset default inconsistency between
-'                          Driver.vb profile defaults and SetupDialogForm.vb mount-save values.
 ' 
 '  the above are released to BETA as 2.1, pushed to GIT repository
+'
+'  05-JUL-2026  WEM        WiFi (TCP) refraction fix -> version 6.0.0.3. Re-enabled the post-reply
+'                          refraction delay (WIFI_REFRACTION, now 25ms) in the CommandString WiFi
+'                          path. Measured straight to the mount (raw sockets, no driver): a command
+'                          sent ~0ms after the previous reply is silently DROPPED ~50% of the time;
+'                          any gap >= ~10ms => 100% success. Without the delay every other command
+'                          dropped and cost ~1s (500ms read-timeout + 500ms retry1 + resend), so
+'                          WiFi polling crawled (RA updated only ~every 8s). With the 25ms refraction
+'                          commands succeed on the first try (~35ms) and WiFi is smooth. The drop is
+'                          the mount/ESP needing a brief gap after it finishes a reply before the
+'                          next command; envision (raw 54372) avoids it, this paces the AT path.
 '--------------------------------------------------------------------------------------------------------
 '
 '
@@ -179,6 +188,7 @@ Imports ASCOM.Astrometry.AstroUtils
 Imports ASCOM.DeviceInterface
 Imports ASCOM.Utilities
 Imports ASCOM.Astrometry.Transform
+Imports MathNet.Numerics.LinearAlgebra
 
 Imports System
 Imports System.Collections
@@ -275,6 +285,13 @@ Public Class Telescope
     Friend Shared WiFiModuleIDDefault As String = "Microchip RN-131"
     Friend Shared MountMaxSpeedDefault As String = Convert.ToString(40000)
     Friend Shared SkySafari_rateDefault As String = Convert.ToString(0)
+    ' Slew-time offset defaults (seconds). Used by ReadProfile when no profile entry exists.
+    ' MUST stay in sync with the unconditional defaults set in SetupDialogForm.OK_Button_Click,
+    ' otherwise opening Setup once silently changes the runtime values from the profile defaults
+    ' to the dialog defaults (the dialog overwrites and WriteProfile then persists the new values).
+    ' Mount-specific overrides (Scotty/ASKO -> 2.0/2.0 LongMove) are applied later in that cascade.
+    ' Values below are empirical and may still need tuning per mount; consistency between the two
+    ' locations is the only guarantee here.
     Friend Shared LongMoveoffset1default As String = Convert.ToString(8)
     Friend Shared LongMoveoffset2default As String = Convert.ToString(-4)
     Friend Shared Ramponlyoffset1default As String = Convert.ToString(4)
@@ -349,7 +366,7 @@ Public Class Telescope
     Private Const WIFI_READ_TIMEOUT As Integer = 500        '500ms read timeout - ESP needs headroom under load
     Private Const WIFI_CONNECT_TIMEOUT As Integer = 5000    '5 second connect timeout
     Private Const WIFI_MASTER_TIMEOUT As Integer = 10000   '10 second master timeout - if semaphore not acquired, ESP is dead
-    Private Const WIFI_REFRACTION As Integer = 50           '50ms breathing room for ESP after each command
+    Private Const WIFI_REFRACTION As Integer = 25           '25ms breathing room for ESP after each command (measured: >=~10ms => 100%, 0ms drops ~50%)
     Private Const WIFI_TERMINATOR As Char = "!"c
     Private CorrectionSlewActive As Boolean = False     'True while correction slew phase is active - keeps Slewing=True
     Private CorrectionSlewSent As Boolean = False       'True after correction ESPt sent - checked by Slewing with time guard
@@ -601,8 +618,12 @@ Public Class Telescope
                         End Try
                     End Try
 
-                    'Refraction time - give ESP breathing room before next command
-                    'System.Threading.Thread.Sleep(WIFI_REFRACTION)
+                    'Refraction time - give ESP breathing room before next command.
+                    'MEASURED 2026-07-05 straight to the mount (raw sockets, no driver): a
+                    'command sent ~0ms after the previous reply is silently dropped ~50% of
+                    'the time; any gap >= ~10ms => 100% success. This is THE fix for the slow/
+                    'dropped-command stalls (each drop otherwise cost ~1s of read-timeout+resend).
+                    System.Threading.Thread.Sleep(WIFI_REFRACTION)
 
                 Finally
                     WiFiSemaphore.Release()
