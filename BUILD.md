@@ -44,7 +44,7 @@ After the Release DLL is built:
 The setup executable is created at:
 
 ```text
-dist\ExploreScientific-PMC-Eight-ASCOM-Driver-6.0.0.2-Setup.exe
+dist\ExploreScientific-PMC-Eight-ASCOM-Driver-6.0.0.3-Setup.exe
 ```
 
 ## Installer Payload
@@ -57,12 +57,16 @@ installer\payload\c_\ES_PMC8_Utilities
 
 That payload was extracted from the current public Explore Scientific setup executable so the rebuilt installer carries forward the required support utilities.
 
-The firmware binary in the payload has been updated to:
+The ASCOM installer payload currently retains this support firmware binary:
 
 ```text
 20A02.1.8.3.bt.binary
 ```
 
-This matches the current public PMC-Eight firmware binary distributed from Wes McDonald's public `pmc8-tools` repository.
+Current public PMC-Eight firmware releases are hosted separately in the official Explore Scientific firmware release repository:
+
+```text
+https://github.com/ExploreScientific/PMC-Eight-Firmware/releases/latest
+```
 
 The UFCT executable and Propellent support files in the payload are taken from the current public Explore Scientific Shopify UFCT ZIP package.

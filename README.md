@@ -8,11 +8,11 @@ Use this driver when controlling an Explore Scientific PMC-Eight mount from Wind
 
 The current public setup package is published from this repository's GitHub Releases page:
 
-https://github.com/ExploreScientific/PMC-Eight-ASCOM-Driver/releases/latest
+https://github.com/ExploreScientific/PMC-Eight-ASCOM-Driver-Source/releases/latest
 
 Download the setup executable from the latest release assets:
 
-`ExploreScientific-PMC-Eight-ASCOM-Driver-6.0.0.2-Setup.exe`
+`ExploreScientific-PMC-Eight-ASCOM-Driver-6.0.0.3-Setup.exe`
 
 ## Requirements
 
@@ -40,7 +40,7 @@ The setup program includes the same support utilities carried by the current Exp
 - Current public PMC-Eight Universal Firmware Configuration Tool 1.3 package files.
 - Propellent firmware programming utility files required by UFCT.
 - Configure PMC8 for Home Network Connection utility.
-- PMC-Eight firmware binary `20A02.1.8.3.bt.binary`, matching the current public firmware package.
+- PMC-Eight support firmware binary `20A02.1.8.3.bt.binary`, retained in this ASCOM installer payload for compatibility with the bundled support utilities. Current public PMC-Eight firmware releases are hosted separately at https://github.com/ExploreScientific/PMC-Eight-Firmware/releases/latest.
 - PMC-Eight utility documentation and release notes.
 
 ## Build
