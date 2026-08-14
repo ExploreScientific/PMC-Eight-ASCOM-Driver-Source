@@ -23,6 +23,11 @@ Public Class SetupDialogForm
         Telescope.MSROMount = False
         Telescope.ScottyMount = False
         Telescope.MountMaxSpeed = 40000         'default max speed is 40000
+        ' Slew-time offset defaults. MUST stay in sync with profile defaults in Driver.vb
+        ' (LongMoveoffset1default / LongMoveoffset2default / Ramponlyoffset1default / Ramponlyoffset2default).
+        ' These are unconditional overwrites: opening Setup and clicking OK forces these values, which
+        ' WriteProfile then persists. Mount-specific cascade below may override (Scotty/ASKO -> 2.0/2.0).
+        ' Values are empirical and may still need tuning; the contract here is consistency only.
         Telescope.LongMoveOffset1 = 8           'default for Slew to target long movement time offset
         Telescope.LongMoveOffset2 = -4          'default for slew.  Build in the negative signs as needed
         Telescope.RampOnlyOffset1 = 4
