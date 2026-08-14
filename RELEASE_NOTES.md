@@ -1,5 +1,27 @@
 # Release Notes
 
+## 6.0.0.3
+
+Syncs Wes McDonald's WiFi/TCP pacing fix from the public `wifi-fix` branch.
+
+This release provides:
+
+- Re-enabled a measured 25 ms post-reply delay in the WiFi command path to avoid dropped commands when polling over TCP.
+- Driver assembly version bump from `6.0.0.2` to `6.0.0.3`.
+- Installer metadata bump from `6.0.0.2` to `6.0.0.3`.
+
+Installer asset:
+
+```text
+ExploreScientific-PMC-Eight-ASCOM-Driver-6.0.0.3-Setup.exe
+```
+
+Driver assembly version:
+
+```text
+6.0.0.3
+```
+
 ## 6.0.0.2
 
 Initial Explore Scientific public GitHub release packaging for the PMC-Eight ASCOM driver.

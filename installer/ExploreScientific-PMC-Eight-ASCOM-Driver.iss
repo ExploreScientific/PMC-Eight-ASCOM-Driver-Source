@@ -4,7 +4,7 @@
 ; builds are repeatable without developer-specific folders.
 ;
 
-#define DriverVersion "6.0.0.2"
+#define DriverVersion "6.0.0.3"
 #define RepoRoot ".."
 #define UtilityPayload "payload\c_\ES_PMC8_Utilities"
 
