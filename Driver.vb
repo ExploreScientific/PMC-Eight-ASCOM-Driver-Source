@@ -642,21 +642,30 @@ Public Class Telescope
         Try
             TL.LogMessage("VerifyWiFiComm", "Verifying WiFi communication to " & IPAddress)
 
-            EnsureWiFiConnected()
-
-            'Send ESGp0! to verify communication
-            Dim sendBytes As [Byte]() = System.Text.Encoding.ASCII.GetBytes("ESGp0!")
-            objTCPStream.Write(sendBytes, 0, sendBytes.Length)
-            Dim responseData As String = ReadUntilTerminator()
-            TL.LogMessage("VerifyWiFiComm", "Response: " & responseData)
-
-            If Left(responseData, 5) = "ESGp0" Then
-                TL.LogMessage("VerifyWiFiComm", "WiFi communication verified successfully")
-                Return True
-            Else
-                TL.LogMessage("VerifyWiFiComm", "Invalid response from PMC-Eight")
+            If Not WiFiSemaphore.Wait(WIFI_MASTER_TIMEOUT) Then
+                TL.LogMessage("VerifyWiFiComm", "Could not acquire WiFiSemaphore")
                 Return False
             End If
+
+            Try
+                EnsureWiFiConnected()
+
+                'Send ESGp0! to verify communication
+                Dim sendBytes As [Byte]() = System.Text.Encoding.ASCII.GetBytes("ESGp0!")
+                objTCPStream.Write(sendBytes, 0, sendBytes.Length)
+                Dim responseData As String = ReadUntilTerminator()
+                TL.LogMessage("VerifyWiFiComm", "Response: " & responseData)
+
+                If Left(responseData, 5) = "ESGp0" Then
+                    TL.LogMessage("VerifyWiFiComm", "WiFi communication verified successfully")
+                    Return True
+                Else
+                    TL.LogMessage("VerifyWiFiComm", "Invalid response from PMC-Eight")
+                    Return False
+                End If
+            Finally
+                WiFiSemaphore.Release()
+            End Try
 
         Catch ex As Exception
             TL.LogMessage("VerifyWiFiComm", "WiFi verification failed: " & ex.Message)
@@ -3467,6 +3476,7 @@ Public Class Telescope
         objTCPNetwork.NoDelay = True               'Disable Nagle - send commands immediately
         objTCPStream = objTCPNetwork.GetStream()
         objTCPStream.ReadTimeout = WIFI_READ_TIMEOUT
+        objTCPStream.WriteTimeout = WIFI_READ_TIMEOUT
 
         'Handle Microchip RN-131 *HELLO* greeting on fresh connect
         'The greeting does not end with ! so we use a raw buffer read
