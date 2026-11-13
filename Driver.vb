@@ -945,8 +945,8 @@ Public Class Telescope
                     connectedState = False
                 Else
                     TL.LogMessage("Connected Set", "Disconnecting from Network")
-                    CloseWiFiConnection()
                     connectedState = False
+                    CloseWiFiConnection()
                 End If
                 '------------------------------------------------
             End If
@@ -3487,14 +3487,27 @@ Public Class Telescope
     ''' </summary>
     Private Sub CloseWiFiConnection()
         Try
-            If objTCPStream IsNot Nothing Then
-                objTCPStream.Close()
-                objTCPStream = Nothing
-            End If
-            If objTCPNetwork IsNot Nothing Then
-                objTCPNetwork.Close()
-                objTCPNetwork = Nothing
-            End If
+            ' Acquire WiFiSemaphore briefly to prevent disposing sockets mid-transmission
+            Dim acquired As Boolean = False
+            Try
+                acquired = WiFiSemaphore.Wait(1000)
+            Catch ex As Exception
+            End Try
+
+            Try
+                If objTCPStream IsNot Nothing Then
+                    objTCPStream.Close()
+                    objTCPStream = Nothing
+                End If
+                If objTCPNetwork IsNot Nothing Then
+                    objTCPNetwork.Close()
+                    objTCPNetwork = Nothing
+                End If
+            Finally
+                If acquired Then
+                    WiFiSemaphore.Release()
+                End If
+            End Try
         Catch ex As Exception
             'Never throw from cleanup
         End Try
